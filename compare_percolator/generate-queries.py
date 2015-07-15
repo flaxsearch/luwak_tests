@@ -5,16 +5,7 @@ import gzip
 import re
 import json
 import random
-
-
-WORD_RE = re.compile(r'\w{2,50}')
-DOWNLOAD_DIR = './text'
-QUERY_DIR = './queries'
-DEFAULT_TERM = 'text'
-
-STOPWORDS = set(['the', 'of', 'and', 'in', 'to', 'was', 'for', 'as', 'on', 'with', 'is', 
-    'by', 'an', 'that', 'he', 'at', 'from', 'his', 'it', 'were', 'which', 'be', 'their', 
-    'this', 'they', 'or', 'her', 'not', 'have', 'had', 'has', 'all', 'are'])
+import conf
 
 
 def readDocs(docdir):
@@ -24,7 +15,7 @@ def readDocs(docdir):
     for fname in os.listdir(docdir):
         if fname.endswith('.gz'):
             with gzip.open(os.path.join(docdir, fname)) as f:
-                docs.append([x.lower() for x in WORD_RE.findall(f.read())])
+                docs.append([x.lower() for x in conf.WORD_RE.findall(f.read())])
     return docs
 
 def makeBoolQuery(docs, must_count, should_count, not_count):
@@ -45,15 +36,15 @@ def makeBoolQuery(docs, must_count, should_count, not_count):
         not_terms.add(random_nonstopword(random.choice(docs)))
         
     return { 'query': { 'bool': {
-        'must': [{ 'term': { DEFAULT_TERM: x }} for x in must_terms],
-        'should': [{ 'term': { DEFAULT_TERM: x }} for x in should_terms],
-        'must_not': [{ 'term': { DEFAULT_TERM: x }} for x in not_terms]
+        'must': [{ 'term': { conf.DEFAULT_TERM: x }} for x in must_terms],
+        'should': [{ 'term': { conf.DEFAULT_TERM: x }} for x in should_terms],
+        'must_not': [{ 'term': { conf.DEFAULT_TERM: x }} for x in not_terms]
     }}}
 
 def random_nonstopword(words):
     while True:
         w = random.choice(words)
-        if w not in STOPWORDS:
+        if w not in conf.STOPWORDS:
             return w
 
 def printMostCommonWords(docs):
@@ -69,7 +60,7 @@ def printMostCommonWords(docs):
 
 
 if __name__ == '__main__':
-    docs = readDocs(DOWNLOAD_DIR)
+    docs = readDocs(conf.DOC_DIR)
     for i in xrange(int(sys.argv[1])):
-        with open(os.path.join(QUERY_DIR, '{0:06d}.json'.format(i))) as f:
+        with open(os.path.join(conf.QUERY_DIR, '{0:06d}.json'.format(i)), 'w') as f:
             json.dump(makeBoolQuery(docs, 3, 3, 1), f)

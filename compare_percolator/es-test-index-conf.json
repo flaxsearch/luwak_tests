@@ -1,0 +1,12 @@
+{
+    "settings" : {
+        "number_of_shards" : 1
+    },
+    "mappings" : {
+        "doc" : {
+            "properties" : {
+                "text" : { "type" : "string", "analyzer" : "standard" }
+            }
+        }
+    }
+}
