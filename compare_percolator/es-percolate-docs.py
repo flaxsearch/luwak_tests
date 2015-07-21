@@ -22,9 +22,9 @@ if __name__ == '__main__':
 
                 print fname, response.json()['total']
 
-                query_ids = [x['_id'] for x in response.json()['matches']]
-                query_ids.sort()
-                print '\n'.join(query_ids)
+#                 query_ids = [x['_id'] for x in response.json()['matches']]
+#                 query_ids.sort()
+#                 print '\n'.join(query_ids)
     
     t1 = time.time()
     print 'matched {0} queries for {1} documents in {2:.2f}s ({3:.2f} docs/s)'.format(

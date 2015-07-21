@@ -18,17 +18,17 @@ def readDocs(docdir):
                 docs.append([x.lower() for x in conf.WORD_RE.findall(f.read())])
     return docs
 
-def makeBoolQuery(docs, must_count, not_count):
+def makeBoolQuery(docs):
     must_terms = set()
     not_terms = set()
     
     # get all the must words from one document
     d = random.choice(docs)
-    while len(must_terms) < must_count:
+    while len(must_terms) < args.MUST:
         must_terms.add(random_nonstopword(d))
 
     # and the not words from different docs    
-    while len(not_terms) < not_count:
+    while len(not_terms) < args.NOT:
         not_terms.add(random_nonstopword(random.choice(docs)))
 
     return ' '.join(['+' + x for x in must_terms] + ['-' + x for x in not_terms])
@@ -37,7 +37,20 @@ def random_nonstopword(words):
     while True:
         w = random.choice(words)
         if w not in conf.STOPWORDS:
-            return w
+            if args.wild is None:
+                return w
+            else:
+                if len(w) > args.wild:
+                    return w[:args.wild] + '*'
+
+def makeWithinQuery(docs):
+    # pick two terms within the specified interval
+    slop = random.randint(0, args.within)
+    while True:
+        doc = random.choice(docs)
+        if len(doc) > slop:
+            i = random.randint(0, len(doc) - slop - 1)
+            return '"{0} {1}"~{2}'.format(doc[i], doc[i + slop], args.within)
 
 def printMostCommonWords(docs):
     counts = {}
@@ -61,12 +74,19 @@ if __name__ == '__main__':
         help='generated query directory')
     parser.add_argument('--MUST', type=int, default=1, 
         help='number of MUST terms to include in queries')
-    parser.add_argument('--NOT', type=int, default=0, 
+    parser.add_argument('--NOT', type=int, default=0,
         help='number of NOT terms to include in queries')
+    parser.add_argument('--wild', type=int, default=None,
+        help='prefix length for wildcard terms')
+    parser.add_argument('--within', type=int, default=None,
+        help='generate a two-term phrase query with specified slop')
     
     args = parser.parse_args()
     docs = readDocs(args.docdir)
     for i in xrange(args.count):
         with open(os.path.join(args.querydir, '{0:06d}.txt'.format(i)), 'w') as f:
-            f.write(makeBoolQuery(docs, args.MUST, args.NOT))
+            if args.within:
+                f.write(makeWithinQuery(docs))
+            else:
+                f.write(makeBoolQuery(docs))
 

@@ -53,9 +53,9 @@ public class LuwakTester
         	MonitorQuery mq = new MonitorQuery(query_id, query_text);
         	monitor.update(mq);
         	count++;
-        	if (count % 1000 == 0) {
-        		System.out.println("loaded " + count + " queries");
-        	}
+//        	if (count % 1000 == 0) {
+//        		System.out.println("loaded " + count + " queries");
+//        	}
     	}
     	
     	long t0 = System.currentTimeMillis();
