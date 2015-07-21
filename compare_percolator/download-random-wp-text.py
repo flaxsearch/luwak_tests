@@ -16,7 +16,7 @@ if __name__ == '__main__':
             text = ''.join(s.xpath('//body//p//text()').extract())
         
         name = response.url.split('/')[-1]
-        with gzip.open(os.path.join(conf.DOC_DIR, name + '.gz'), 'w') as f:
+        with gzip.open(os.path.join(sys.argv[2], name + '.gz'), 'w') as f:
             f.write(text.encode('utf8'))
 
         print i, name
