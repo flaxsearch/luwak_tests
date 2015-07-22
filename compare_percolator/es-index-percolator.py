@@ -5,14 +5,26 @@ import json
 import conf
 
 if __name__ == '__main__':
+    bulk = []
+    count = 0
     for fname in os.listdir(sys.argv[1]):
         if fname.endswith('.txt'):
             query_id = fname.split('.')[0]
-            query_url = '{0}/.percolator/{1}'.format(conf.ES_URL, query_id)
+            bulk.append('{"index":{"_index":"%s","_type":".percolator","_id":"%s"}}'
+                % (conf.ES_DB, query_id))
             with open(os.path.join(sys.argv[1], fname)) as f:
                 query_obj = { 'query': { 'query_string': {
                     'default_field': conf.DEFAULT_FIELD,
                     'query': f.read() }}}
-                response = requests.put(query_url, data=json.dumps(query_obj))
-                assert response.status_code == 201
-                print query_url
+                bulk.append(json.dumps(query_obj))
+                if len(bulk) == 100:
+                    response = requests.put(conf.ES_URL + '_bulk',
+                        data='\n'.join(bulk) + '\n')
+                    assert response.status_code == 200
+                    count += len(bulk)
+                    print count
+                    bulk = []
+
+    if bulk:
+        response = requests.put(conf.ES_URL + '_bulk', data='\n'.join(bulk) + '\n')
+        assert response.status_code == 200
