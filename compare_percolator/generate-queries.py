@@ -19,29 +19,21 @@ def readDocs(docdir):
     return docs
 
 def makeBoolQuery(docs):
+    # get the must terms from one document so we have at least one match
     must_terms = set()
-    not_terms = set()
-    
-    # get all the must words from one document
-    d = random.choice(docs)
     while len(must_terms) < args.MUST:
-        must_terms.add(random_nonstopword(d))
-
-    # and the not words from different docs    
+        must_terms = set(random.choice(docs))
+        
+    must_terms = list(must_terms)
+    random.shuffle(must_terms)
+    must_terms = must_terms[:args.MUST]
+        
+    # get the not words from different docs
+    not_terms = set()
     while len(not_terms) < args.NOT:
-        not_terms.add(random_nonstopword(random.choice(docs)))
+        not_terms.add(random.choice([x for x in random.choice(docs) if x not in conf.STOPWORDS]))
 
     return ' '.join(['+' + x for x in must_terms] + ['-' + x for x in not_terms])
-
-def random_nonstopword(words):
-    while True:
-        w = random.choice(words)
-        if w not in conf.STOPWORDS:
-            if args.wild is None:
-                return w
-            else:
-                if len(w) > args.wild:
-                    return w[:args.wild] + '*'
 
 def makeWithinQuery(docs):
     # pick two terms within the specified interval
@@ -50,7 +42,8 @@ def makeWithinQuery(docs):
         doc = random.choice(docs)
         if len(doc) > slop:
             i = random.randint(0, len(doc) - slop - 1)
-            return '"{0} {1}"~{2}'.format(doc[i], doc[i + slop], args.within)
+            if doc[i] not in conf.STOPWORDS and doc[i + slop] not in conf.STOPWORDS:
+                return '"{0} {1}"~{2}'.format(doc[i], doc[i + slop], args.within)
 
 def printMostCommonWords(docs):
     counts = {}
@@ -84,6 +77,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     docs = readDocs(args.docdir)
     for i in xrange(args.count):
+        if i and i % 1000 == 0: print i
         with open(os.path.join(args.querydir, '{0:06d}.txt'.format(i)), 'w') as f:
             if args.within:
                 f.write(makeWithinQuery(docs))
