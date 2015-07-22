@@ -10,4 +10,5 @@ STOPWORDS = set(['the', 'of', 'and', 'in', 'to', 'was', 'for', 'as', 'on', 'with
     'by', 'an', 'that', 'he', 'at', 'from', 'his', 'it', 'were', 'which', 'be', 'their', 
     'this', 'they', 'or', 'her', 'not', 'have', 'had', 'has', 'all', 'are'])
 
-ES_URL = 'http://localhost:9200/test'
+ES_URL = 'http://localhost:9200/'
+ES_DB = 'test'

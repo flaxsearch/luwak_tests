@@ -21,7 +21,7 @@ if __name__ == '__main__':
                     response = requests.put(conf.ES_URL + '_bulk',
                         data='\n'.join(bulk) + '\n')
                     assert response.status_code == 200
-                    count += len(bulk)
+                    count += len(bulk) / 2
                     print count
                     bulk = []
 
