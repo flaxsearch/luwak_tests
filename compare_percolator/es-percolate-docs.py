@@ -6,6 +6,8 @@ import gzip
 import json
 import conf
 
+LIMIT=1000
+
 
 if __name__ == '__main__':
     total = 0
@@ -19,9 +21,10 @@ if __name__ == '__main__':
                 assert response.status_code == 200
                 total += response.json()['total']
                 count += 1
-
+                
                 print fname, response.json()['total']
-
+                if count > LIMIT:
+                    break
 
 #                 query_ids = [x['_id'] for x in response.json()['matches']]
 #                 query_ids.sort()
