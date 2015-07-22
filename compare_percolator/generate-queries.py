@@ -22,7 +22,8 @@ def makeBoolQuery(docs):
     # get the must terms from one document so we have at least one match
     must_terms = set()
     while len(must_terms) < args.MUST:
-        must_terms = set(random.choice(docs))
+        must_terms = set(x for x in random.choice(docs) 
+            if args.wild is None or len(x) >= args.wild)
         
     must_terms = list(must_terms)
     random.shuffle(must_terms)
@@ -31,7 +32,13 @@ def makeBoolQuery(docs):
     # get the not words from different docs
     not_terms = set()
     while len(not_terms) < args.NOT:
-        not_terms.add(random.choice([x for x in random.choice(docs) if x not in conf.STOPWORDS]))
+        not_terms.add(random.choice([
+            x for x in random.choice(docs) 
+            if x not in conf.STOPWORDS and (args.wild is None or len(x) >= args.wild)]))
+    
+    if args.wild is not None:
+        must_terms = [x[:args.wild] + '*' for x in must_terms]
+        not_terms = [x[:args.wild] + '*' for x in not_terms]
 
     return ' '.join(['+' + x for x in must_terms] + ['-' + x for x in not_terms])
 
