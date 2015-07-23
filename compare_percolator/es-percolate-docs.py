@@ -6,12 +6,12 @@ import gzip
 import json
 import conf
 
-LIMIT=1000
-
 
 if __name__ == '__main__':
     total = 0
     count = 0
+    limit = int(sys.argv[2]) if len(sys.argv) > 2 else 10000000
+    
     t0 = time.time()
     for fname in os.listdir(sys.argv[1]):
         if fname.endswith('.gz'):
@@ -23,7 +23,7 @@ if __name__ == '__main__':
                 count += 1
                 
                 print fname, response.json()['total']
-                if count > LIMIT:
+                if count > limit:
                     break
 
 #                 query_ids = [x['_id'] for x in response.json()['matches']]
