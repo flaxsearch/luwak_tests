@@ -24,8 +24,7 @@ import uk.co.flax.luwak.presearcher.TermFilteredPresearcher;
 import uk.co.flax.luwak.queryparsers.LuceneQueryParser;
 
 /**
- * Hello world!
- *
+ * Luwak test class
  */
 public class LuwakTester 
 {
@@ -53,9 +52,14 @@ public class LuwakTester
         	MonitorQuery mq = new MonitorQuery(query_id, query_text);
         	monitor.update(mq);
         	count++;
-//        	if (count % 1000 == 0) {
-//        		System.out.println("loaded " + count + " queries");
-//        	}
+        	if (count % 1000 == 0) {
+        		System.out.println("loaded " + count + " queries");
+        	}
+    	}
+
+    	int limit = 1000000;
+    	if (args.length == 3) {
+    		limit = Integer.parseInt(args[2]);
     	}
     	
     	long t0 = System.currentTimeMillis();
@@ -66,6 +70,7 @@ public class LuwakTester
     		public boolean accept(File f) { return f.getName().endsWith(".gz"); }
     	});
     	
+    	count = 0;
     	for (File doc_file : doc_files) {
     		FileInputStream fis = new FileInputStream(doc_file);
     		String doc_text = IOUtils.toString(new GZIPInputStream(fis));
@@ -76,6 +81,9 @@ public class LuwakTester
         	
         	Matches<QueryMatch> matches = monitor.match(doc, SimpleMatcher.FACTORY);
         	System.out.println(doc_file.getName() + " " + matches.getMatchCount());
+        	count ++;
+        	if (count == limit) break;
+        	
 //        	ArrayList<String> query_ids = new ArrayList<String>(matches.getMatchCount());
 //        	for (QueryMatch match : matches) {
 //        		query_ids.add(match.getQueryId());
@@ -87,7 +95,8 @@ public class LuwakTester
     	}
     	
     	long t1 = System.currentTimeMillis();
-    	System.out.println("matched " + doc_files.length + " docs in " + (t1 -t0) + " ms");
+    	System.out.println("matched " + count + " docs in " + (t1 - t0) + " ms (" +
+    	    String.format("%.2f", count * 1000.0 / (t1 - t0)) + " docs/s)");
     	
     	monitor.close();
     }
