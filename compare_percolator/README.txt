@@ -131,11 +131,13 @@ percolated.
 Running Luwak tests
 -------------------
 
-Luwak currently stores its query index in memory, with no option to store this on disk
-(this is rarely a concern for long-running monitor processes). Therefore, the test app
-loads the queries before processing the documents (and does not include this load time
-in the documents per second calculation). To run the test app, give it the location of
-the query directory and document directory, e.g.:
+The Luwak test app loads the queries into an in-memory index before processing the 
+documents. It does not include this load time in the documents-per-second calculation,
+since query load time will be an insignificant overhead in any long-running monitor
+application (it is also possible to store the index on disk similarly to Percolator).
+
+To run the test app, give it the location of the query directory and document 
+directory, e.g.:
 
     $ java -Xms4G -jar luwak_test/target/luwak_test-0.0.1-SNAPSHOT.jar \
            queries documents
